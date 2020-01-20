@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Default</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <button id="startButton" onclick="start()">Start</button>
+        <button  onclick="stop()">Stop</button>
+        <button  onclick="clearTextArea()">Clear</button><br/>
+        <textarea id="displayTextArea" readonly="readonly" rows="30" cols="45"></textarea><br/>
+
+        <script>
+            var eventSource = null;
+            function start(){
+                eventSource = new EventSource('http://localhost:8080/ServerSentEventsServlets/SseServlet');
+                eventSource.onopen = function(){displayTextArea.value += 'Connected...'+'\n';};
+                eventSource.onmessage = function(message){displayTextArea.value += message.data+'\n\n';};
+                eventSource.onerror = function(){displayTextArea.value += 'Error occured...'+'\n';};
+                startButton.disabled = true;
+            }
+            function stop(){
+                eventSource.close();
+                startButton.disabled = false;
+            }
+            function clearTextArea(){
+                displayTextArea.value = '';
+            }
+        </script>
+    </body>
+
+</html>

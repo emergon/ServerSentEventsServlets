@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Stocks</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <input type="text" id="nameText" size="20">
+        <select id="typeSelect">
+            <option value="Price">Price</option>
+            <option value="Volume">Volume</option>
+        </select>
+        <button id="monitorButton" onclick="stockEvent()">Monitor</button>
+        <button  onclick="stop()">Stop</button>
+        <button  onclick="clearTextArea()">Clear</button><br/>
+        <textarea id="displayTextArea" readonly="readonly" rows="30" cols="45"></textarea><br/>
+
+        <script>
+            var eventSource = null;
+            function stockEvent() {
+                eventSource = new EventSource('http://localhost:8080/ServerSentEventsServlets/StockEvent?name=' + nameText.value + '&type=' + typeSelect.value);
+                eventSource.addEventListener('Price', handleStockPriceEvent, false);
+                eventSource.addEventListener('Volume', handleStockVolumeEvent, false);
+                eventSource.onopen = function () {
+                    displayTextArea.value += 'Connected...' + '\n';
+                };
+                eventSource.onmessage = function (message) {
+                    displayTextArea.value += message.data + '\n\n';
+                };
+                eventSource.onerror = function () {
+                    displayTextArea.value += 'Error occured...' + '\n';
+                };
+                monitorButton.disabled = true;
+            }
+            function handleStockPriceEvent(event) {
+                displayTextArea.value += 'Event: Monitor Stock Price \n';
+                displayTextArea.value += event.data + '\n\n';
+            }
+            function handleStockVolumeEvent(event) {
+                displayTextArea.value += 'Event: Monitor Stock Volume \n';
+                displayTextArea.value += event.data + '\n\n';
+            }
+            function stop() {
+                eventSource.close();
+                monitorButton.disabled = false;
+            }
+            function clearTextArea() {
+                displayTextArea.value = '';
+            }
+        </script>
+    </body>
+
+</html>
